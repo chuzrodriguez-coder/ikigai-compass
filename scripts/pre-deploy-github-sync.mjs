@@ -14,7 +14,7 @@
  * No external npm dependencies — uses only Node.js built-ins and global fetch.
  */
 
-import { execSync } from "node:child_process";
+import { execSync, execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
 // ---------------------------------------------------------------------------
@@ -126,10 +126,11 @@ try {
 
 /**
  * Compute the git object SHA for a blob using `git hash-object`.
- * This is the same SHA git stores and GitHub reports in tree listings.
+ * Uses execFileSync with argument array to avoid shell-injection risk
+ * from filenames containing special characters.
  */
 function gitBlobSha(filePath) {
-  return execSync(`git hash-object "${filePath}"`, { encoding: "utf8" }).trim();
+  return execFileSync("git", ["hash-object", filePath], { encoding: "utf8" }).trim();
 }
 
 let files;
