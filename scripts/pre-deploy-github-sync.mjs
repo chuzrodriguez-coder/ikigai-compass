@@ -2,19 +2,20 @@
 /**
  * pre-deploy-github-sync.mjs
  *
- * Mandatory pre-deployment gate: pushes all git-tracked source files to GitHub
- * before any artifact is built. Only uploads files whose content has changed
- * since the last sync, keeping GitHub API usage well within rate limits.
+ * Mandatory pre-deployment gate: pushes all git changes to GitHub before any
+ * artifact is built. Sends only the delta (changed/added/deleted files) rather
+ * than a full mirror, keeping API usage minimal.
  * Exits non-zero on failure, which blocks the deploy.
  *
  * Requirements:
- *   - GITHUB_PERSONAL_ACCESS_TOKEN env var: a GitHub PAT with `repo` scope.
+ *   - GITHUB_PERSONAL_ACCESS_TOKEN (or GITHUB_TOKEN) env var: a GitHub PAT
+ *     with `repo` scope.
  *   - git remote "origin" pointing at the GitHub repository.
  *
  * No external npm dependencies — uses only Node.js built-ins and global fetch.
  */
 
-import { execSync, execFileSync } from "node:child_process";
+import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
 // ---------------------------------------------------------------------------
@@ -40,7 +41,7 @@ try {
   process.exit(1);
 }
 
-console.log(`[pre-deploy] Syncing to GitHub: ${owner}/${repoName}`);
+console.log(`[pre-deploy] Syncing changes to GitHub: ${owner}/${repoName}`);
 
 // ---------------------------------------------------------------------------
 // 2. GitHub API helpers
@@ -106,7 +107,7 @@ try {
     currentTreeSha = commit.tree.sha;
     console.log(`[pre-deploy] Current GitHub main: ${currentCommitSha.slice(0, 8)}`);
 
-    // Walk the full recursive tree to know current blob SHAs
+    // Walk the full recursive tree to know current blob SHAs for diffing
     const tree = await gh("GET", `/repos/${owner}/${repoName}/git/trees/${currentTreeSha}?recursive=1`);
     for (const item of tree.tree) {
       if (item.type === "blob") remoteBlobs[item.path] = item.sha;
@@ -121,83 +122,67 @@ try {
 }
 
 // ---------------------------------------------------------------------------
-// 4. Collect tracked files and compute local git blob SHAs
+// 4. Compute delta: changed/added/deleted files only
+//
+// Uses `git ls-files --stage` to get the git object SHA and file mode for
+// every tracked file in one command — no per-file hashing needed.
+// Output format per line: "<mode> <sha1> <stage>\t<path>"
 // ---------------------------------------------------------------------------
 
-/**
- * Compute the git object SHA for a blob using `git hash-object`.
- * Uses execFileSync with argument array to avoid shell-injection risk
- * from filenames containing special characters.
- */
-function gitBlobSha(filePath) {
-  return execFileSync("git", ["hash-object", filePath], { encoding: "utf8" }).trim();
-}
-
-let files;
+let localIndex; // Array of { mode, sha, file, filePath }
 try {
-  files = execSync("git ls-files", { encoding: "utf8" })
+  const cwd = process.cwd();
+  localIndex = execSync("git ls-files --stage", { encoding: "utf8" })
     .trim()
     .split("\n")
-    .filter((f) => f.length > 0);
+    .filter((l) => l.length > 0)
+    .map((line) => {
+      const tabIdx = line.indexOf("\t");
+      const meta = line.slice(0, tabIdx).split(" ");
+      const file = line.slice(tabIdx + 1);
+      return { mode: meta[0], sha: meta[1], file, filePath: `${cwd}/${file}` };
+    });
 } catch (e) {
   console.error(`[pre-deploy] ERROR listing git-tracked files: ${e.message}`);
   process.exit(1);
 }
 
-console.log(`[pre-deploy] Checking ${files.length} tracked files for changes...`);
-
-const cwd = process.cwd();
-const changedFiles = [];
-const unchangedBlobMap = {}; // path -> sha (re-use existing blob SHAs)
-
-for (const file of files) {
-  const filePath = `${cwd}/${file}`;
-
-  let localSha;
-  try {
-    localSha = gitBlobSha(filePath);
-  } catch (e) {
-    console.error(`[pre-deploy] ERROR hashing ${file}: ${e.message}`);
-    process.exit(1);
-  }
-
-  if (remoteBlobs[file] && remoteBlobs[file] === localSha) {
-    unchangedBlobMap[file] = localSha;
-  } else {
-    changedFiles.push({ file, filePath });
-  }
-}
-
-// Check for deletions: files present on GitHub but absent locally
-const localPathSet = new Set(files);
-const deletedOnGitHub = Object.keys(remoteBlobs).filter((p) => !localPathSet.has(p));
-
-console.log(
-  `[pre-deploy] ${changedFiles.length} files changed, ${Object.keys(unchangedBlobMap).length} unchanged, ${deletedOnGitHub.length} deleted.`
+// Files added or modified locally (blob SHA differs from remote, or not on remote)
+const changedFiles = localIndex.filter(
+  (entry) => !remoteBlobs[entry.file] || remoteBlobs[entry.file] !== entry.sha
 );
 
-// Always proceed to create a commit — every deploy must produce a GitHub
-// commit for auditability, even when no file content changed.
+// Files deleted locally but still present on GitHub
+const localPathSet = new Set(localIndex.map((e) => e.file));
+const deletedFiles = Object.keys(remoteBlobs).filter((p) => !localPathSet.has(p));
+
+console.log(
+  `[pre-deploy] Delta: ${changedFiles.length} changed/added, ${deletedFiles.length} deleted.`
+);
+
+// Always proceed to commit — every deploy produces an audit commit on GitHub.
 
 // ---------------------------------------------------------------------------
-// 5. Upload only the changed blobs (with throttle + retry)
+// 5. Upload blobs for changed/added files only (with throttle + retry)
 // ---------------------------------------------------------------------------
 
-const blobMap = { ...unchangedBlobMap };
+const uploadedBlobs = {}; // path -> { sha, mode } for newly uploaded files
 let blobsDone = 0;
 const BATCH_SIZE = 10;
 const BATCH_DELAY_MS = 2000;
 
 for (let i = 0; i < changedFiles.length; i++) {
-  const { file, filePath } = changedFiles[i];
+  const { file, filePath, mode } = changedFiles[i];
+
+  // Symlinks (mode 120000) store the link target as text content
   const buf = readFileSync(filePath);
-  const isBinary = buf.slice(0, 8000).includes(0);
+  const isBinary = mode !== "120000" && buf.slice(0, 8000).includes(0);
   const encoding = isBinary ? "base64" : "utf-8";
   const content = isBinary ? buf.toString("base64") : buf.toString("utf8");
 
   try {
     const blob = await gh("POST", `/repos/${owner}/${repoName}/git/blobs`, { content, encoding }, { retries: 5 });
-    blobMap[file] = blob.sha;
+    uploadedBlobs[file] = { sha: blob.sha, mode };
   } catch (e) {
     console.error(`[pre-deploy] ERROR creating blob for ${file}: ${e.message}`);
     process.exit(1);
@@ -216,22 +201,37 @@ for (let i = 0; i < changedFiles.length; i++) {
   }
 }
 
-console.log(`[pre-deploy] ${changedFiles.length} blobs uploaded.`);
+if (changedFiles.length > 0) {
+  console.log(`[pre-deploy] ${changedFiles.length} blobs uploaded.`);
+}
 
 // ---------------------------------------------------------------------------
-// 6. Create tree, commit, update ref
+// 6. Create delta tree, commit, update ref
+//
+// Uses base_tree so GitHub inherits all unchanged files automatically.
+// Only the delta (changed/added entries + sha:null deletions) is sent.
 // ---------------------------------------------------------------------------
 
-const treeEntries = Object.entries(blobMap).map(([path, sha]) => ({
-  path,
-  mode: "100644",
-  type: "blob",
-  sha,
-}));
+const deltaEntries = [
+  // Changed and added files
+  ...Object.entries(uploadedBlobs).map(([path, { sha, mode }]) => ({
+    path,
+    mode,
+    type: mode === "160000" ? "commit" : "blob",
+    sha,
+  })),
+  // Deleted files: sha: null tells GitHub to remove them from the tree
+  ...deletedFiles.map((path) => ({
+    path,
+    mode: "100644",
+    type: "blob",
+    sha: null,
+  })),
+];
 
-// Do NOT use base_tree — create a complete snapshot tree so that files
-// deleted locally are also absent from GitHub (true mirror sync).
-const treeBody = { tree: treeEntries };
+const treeBody = { tree: deltaEntries };
+// Use base_tree so unchanged files are inherited without being re-listed
+if (currentTreeSha) treeBody.base_tree = currentTreeSha;
 
 let tree;
 try {
@@ -244,7 +244,7 @@ console.log(`[pre-deploy] Tree: ${tree.sha.slice(0, 8)}`);
 
 const now = new Date().toISOString();
 const commitBody = {
-  message: `chore: deploy sync ${now}\n\nChanged: ${changedFiles.length}  Unchanged: ${Object.keys(unchangedBlobMap).length}  Deleted: ${deletedOnGitHub.length}`,
+  message: `chore: deploy sync ${now}\n\nChanged/added: ${changedFiles.length}  Deleted: ${deletedFiles.length}`,
   tree: tree.sha,
   author: { name: "Replit Deploy Sync", email: "noreply@replit.com", date: now },
 };

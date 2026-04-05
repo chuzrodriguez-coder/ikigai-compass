@@ -132,6 +132,21 @@ Every package extends `tsconfig.base.json` which sets `composite: true`. The roo
 - The remote `origin` is configured in this project to point to the repository above.
 - To push future changes, use Replit's Version Control panel (which uses the connected GitHub OAuth account), or run `git push origin main` from the shell with a GitHub Personal Access Token.
 
+## Deploy-to-GitHub Sync Gate
+
+Every production deployment automatically syncs all source files to GitHub before building. This is wired via `scripts/deploy-build.sh`, which is called as the production build command for the API server artifact.
+
+**How it works:**
+1. `scripts/deploy-build.sh` runs first: calls `node scripts/pre-deploy-github-sync.mjs` then the normal API build
+2. `scripts/pre-deploy-github-sync.mjs` fetches the current GitHub tree, compares local git blob SHAs (via `git ls-files --stage`), uploads only changed files, and always commits a new snapshot to `main`
+3. If sync fails, the build exits non-zero and the deploy is blocked
+
+**Required secret:**
+- `GITHUB_PERSONAL_ACCESS_TOKEN` — a GitHub Personal Access Token (classic) with `repo` scope
+- Create one at: https://github.com/settings/tokens/new (select the `repo` checkbox, 40-char token starting with `ghp_`)
+- The script also accepts `GITHUB_TOKEN` as a fallback name
+- Without this secret, production deploys will fail with a clear error message
+
 ## Root Scripts
 
 - `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages
