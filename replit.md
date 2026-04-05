@@ -125,6 +125,13 @@ Every package extends `tsconfig.base.json` which sets `composite: true`. The roo
 - `docs/technical.md` — Architecture, schema, security, env vars
 - `docs/testing.md` — Test coverage and how to run tests
 
+## GitHub Repository
+
+- **URL**: https://github.com/chuzrodriguez-coder/ikigai-compass
+- **Default branch**: `main`
+- The remote `origin` is configured in this project to point to the repository above.
+- To push future changes, use Replit's Version Control panel (which uses the connected GitHub OAuth account), or run `git push origin main` from the shell with a GitHub Personal Access Token.
+
 ## Root Scripts
 
 - `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages
