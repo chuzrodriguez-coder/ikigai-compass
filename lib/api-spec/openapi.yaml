@@ -1,0 +1,3274 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Ikigai Compass API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: users
+    description: User profile and preferences
+  - name: discovery
+    description: Discovery flow sessions and reflections
+  - name: hypotheses
+    description: Ikigai hypotheses management
+  - name: growth
+    description: Growth plans, goals, milestones
+  - name: checkins
+    description: Accountability check-ins
+  - name: coaching
+    description: Coaching sessions
+  - name: obstacles
+    description: Obstacle tracking
+  - name: dashboard
+    description: Dashboard summaries and momentum
+  - name: openai
+    description: OpenAI AI chat, image, and audio operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /users/me:
+    get:
+      operationId: getMe
+      tags: [users]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Not found
+    put:
+      operationId: updateMe
+      tags: [users]
+      summary: Update current user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserBody"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/me/preferences:
+    get:
+      operationId: getUserPreferences
+      tags: [users]
+      summary: Get user preferences
+      responses:
+        "200":
+          description: User preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPreferences"
+    put:
+      operationId: updateUserPreferences
+      tags: [users]
+      summary: Update user preferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserPreferencesBody"
+      responses:
+        "200":
+          description: Updated preferences
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPreferences"
+
+  /discovery/sessions:
+    get:
+      operationId: listDiscoverySessions
+      tags: [discovery]
+      summary: List discovery sessions
+      responses:
+        "200":
+          description: List of discovery sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DiscoverySession"
+    post:
+      operationId: createDiscoverySession
+      tags: [discovery]
+      summary: Create or resume discovery session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDiscoverySessionBody"
+      responses:
+        "201":
+          description: Created session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiscoverySession"
+
+  /discovery/sessions/{id}:
+    get:
+      operationId: getDiscoverySession
+      tags: [discovery]
+      summary: Get discovery session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Discovery session with answers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiscoverySessionWithAnswers"
+    put:
+      operationId: updateDiscoverySession
+      tags: [discovery]
+      summary: Update discovery session answers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDiscoverySessionBody"
+      responses:
+        "200":
+          description: Updated session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiscoverySession"
+
+  /discovery/sessions/{id}/complete:
+    post:
+      operationId: completeDiscoverySession
+      tags: [discovery]
+      summary: Mark discovery session complete and trigger synthesis
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Completed session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiscoverySession"
+
+  /discovery/reflections:
+    get:
+      operationId: listReflections
+      tags: [discovery]
+      summary: List reflection entries
+      responses:
+        "200":
+          description: List of reflections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReflectionEntry"
+    post:
+      operationId: createReflection
+      tags: [discovery]
+      summary: Create reflection entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReflectionBody"
+      responses:
+        "201":
+          description: Created reflection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReflectionEntry"
+
+  /discovery/reflections/{id}:
+    get:
+      operationId: getReflection
+      tags: [discovery]
+      summary: Get reflection entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Reflection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReflectionEntry"
+    put:
+      operationId: updateReflection
+      tags: [discovery]
+      summary: Update reflection entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateReflectionBody"
+      responses:
+        "200":
+          description: Updated reflection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReflectionEntry"
+
+  /hypotheses:
+    get:
+      operationId: listHypotheses
+      tags: [hypotheses]
+      summary: List Ikigai hypotheses
+      responses:
+        "200":
+          description: List of hypotheses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IkigaiHypothesis"
+    post:
+      operationId: createHypothesis
+      tags: [hypotheses]
+      summary: Create Ikigai hypothesis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateHypothesisBody"
+      responses:
+        "201":
+          description: Created hypothesis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IkigaiHypothesis"
+
+  /hypotheses/{id}:
+    get:
+      operationId: getHypothesis
+      tags: [hypotheses]
+      summary: Get Ikigai hypothesis
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Hypothesis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IkigaiHypothesis"
+    put:
+      operationId: updateHypothesis
+      tags: [hypotheses]
+      summary: Update Ikigai hypothesis
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateHypothesisBody"
+      responses:
+        "200":
+          description: Updated hypothesis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IkigaiHypothesis"
+    delete:
+      operationId: deleteHypothesis
+      tags: [hypotheses]
+      summary: Delete hypothesis
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /hypotheses/{id}/accept:
+    post:
+      operationId: acceptHypothesis
+      tags: [hypotheses]
+      summary: Accept hypothesis as active
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Accepted hypothesis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IkigaiHypothesis"
+
+  /hypotheses/synthesize:
+    post:
+      operationId: synthesizeHypotheses
+      tags: [hypotheses]
+      summary: AI-synthesize Ikigai hypotheses from discovery session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SynthesizeHypothesesBody"
+      responses:
+        "200":
+          description: Generated hypotheses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IkigaiHypothesis"
+
+  /growth/plans:
+    get:
+      operationId: listGrowthPlans
+      tags: [growth]
+      summary: List growth plans
+      responses:
+        "200":
+          description: List of growth plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GrowthPlan"
+    post:
+      operationId: createGrowthPlan
+      tags: [growth]
+      summary: Create growth plan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGrowthPlanBody"
+      responses:
+        "201":
+          description: Created growth plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GrowthPlan"
+
+  /growth/plans/{id}:
+    get:
+      operationId: getGrowthPlan
+      tags: [growth]
+      summary: Get growth plan with milestones
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Growth plan with details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GrowthPlanWithDetails"
+    put:
+      operationId: updateGrowthPlan
+      tags: [growth]
+      summary: Update growth plan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGrowthPlanBody"
+      responses:
+        "200":
+          description: Updated growth plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GrowthPlan"
+
+  /growth/milestones:
+    get:
+      operationId: listMilestones
+      tags: [growth]
+      summary: List milestones
+      responses:
+        "200":
+          description: List of milestones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Milestone"
+    post:
+      operationId: createMilestone
+      tags: [growth]
+      summary: Create milestone
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMilestoneBody"
+      responses:
+        "201":
+          description: Created milestone
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Milestone"
+
+  /growth/milestones/{id}:
+    put:
+      operationId: updateMilestone
+      tags: [growth]
+      summary: Update milestone
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMilestoneBody"
+      responses:
+        "200":
+          description: Updated milestone
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Milestone"
+    delete:
+      operationId: deleteMilestone
+      tags: [growth]
+      summary: Delete milestone
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /growth/actions:
+    get:
+      operationId: listTaskActions
+      tags: [growth]
+      summary: List weekly task actions
+      responses:
+        "200":
+          description: List of task actions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TaskAction"
+    post:
+      operationId: createTaskAction
+      tags: [growth]
+      summary: Create task action
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTaskActionBody"
+      responses:
+        "201":
+          description: Created task action
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskAction"
+
+  /growth/actions/{id}:
+    put:
+      operationId: updateTaskAction
+      tags: [growth]
+      summary: Update task action
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTaskActionBody"
+      responses:
+        "200":
+          description: Updated task action
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskAction"
+
+  /growth/habits:
+    get:
+      operationId: listHabits
+      tags: [growth]
+      summary: List habits
+      responses:
+        "200":
+          description: List of habits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Habit"
+    post:
+      operationId: createHabit
+      tags: [growth]
+      summary: Create habit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateHabitBody"
+      responses:
+        "201":
+          description: Created habit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Habit"
+
+  /growth/habits/{id}:
+    put:
+      operationId: updateHabit
+      tags: [growth]
+      summary: Update habit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateHabitBody"
+      responses:
+        "200":
+          description: Updated habit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Habit"
+    delete:
+      operationId: deleteHabit
+      tags: [growth]
+      summary: Delete habit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /checkins:
+    get:
+      operationId: listCheckIns
+      tags: [checkins]
+      summary: List accountability check-ins
+      responses:
+        "200":
+          description: List of check-ins
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CheckIn"
+    post:
+      operationId: createCheckIn
+      tags: [checkins]
+      summary: Submit accountability check-in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCheckInBody"
+      responses:
+        "201":
+          description: Created check-in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckIn"
+
+  /checkins/{id}:
+    get:
+      operationId: getCheckIn
+      tags: [checkins]
+      summary: Get check-in
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Check-in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckIn"
+
+  /coaching/sessions:
+    get:
+      operationId: listCoachingSessions
+      tags: [coaching]
+      summary: List coaching sessions
+      responses:
+        "200":
+          description: List of coaching sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CoachingSession"
+    post:
+      operationId: createCoachingSession
+      tags: [coaching]
+      summary: Start a coaching session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCoachingSessionBody"
+      responses:
+        "201":
+          description: Created coaching session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoachingSession"
+
+  /coaching/sessions/{id}:
+    get:
+      operationId: getCoachingSession
+      tags: [coaching]
+      summary: Get coaching session with messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Coaching session with messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CoachingSessionWithMessages"
+
+  /obstacles:
+    get:
+      operationId: listObstacles
+      tags: [obstacles]
+      summary: List obstacles
+      responses:
+        "200":
+          description: List of obstacles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Obstacle"
+    post:
+      operationId: createObstacle
+      tags: [obstacles]
+      summary: Log an obstacle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateObstacleBody"
+      responses:
+        "201":
+          description: Created obstacle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Obstacle"
+
+  /obstacles/{id}:
+    put:
+      operationId: updateObstacle
+      tags: [obstacles]
+      summary: Update obstacle status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateObstacleBody"
+      responses:
+        "200":
+          description: Updated obstacle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Obstacle"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary with momentum score
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/momentum:
+    get:
+      operationId: getMomentumHistory
+      tags: [dashboard]
+      summary: Get momentum score history
+      responses:
+        "200":
+          description: Momentum history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProgressSnapshot"
+
+  /dashboard/activity:
+    get:
+      operationId: getRecentActivity
+      tags: [dashboard]
+      summary: Get recent activity feed
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityEvent"
+
+  /openai/conversations:
+    get:
+      operationId: listOpenaiConversations
+      tags: [openai]
+      summary: List all conversations
+      responses:
+        "200":
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OpenaiConversation"
+    post:
+      operationId: createOpenaiConversation
+      tags: [openai]
+      summary: Create a new conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOpenaiConversationBody"
+      responses:
+        "201":
+          description: Created conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiConversation"
+
+  /openai/conversations/{id}:
+    get:
+      operationId: getOpenaiConversation
+      tags: [openai]
+      summary: Get conversation with messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Conversation with messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiConversationWithMessages"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiError"
+    delete:
+      operationId: deleteOpenaiConversation
+      tags: [openai]
+      summary: Delete a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpenaiError"
+
+  /openai/conversations/{id}/messages:
+    get:
+      operationId: listOpenaiMessages
+      tags: [openai]
+      summary: List messages in a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OpenaiMessage"
+    post:
+      operationId: sendOpenaiMessage
+      tags: [openai]
+      summary: Send a text message and receive a streaming text response
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendOpenaiMessageBody"
+      responses:
+        "200":
+          description: SSE stream of assistant text chunks
+          content:
+            text/event-stream: {}
+
+  /reminders/due:
+    get:
+      tags: [Reminders]
+      summary: Get reminders that are currently due
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of due reminders with trigger info
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReminderWithTrigger"
+
+  /reminders/{id}/next-trigger:
+    get:
+      tags: [Reminders]
+      summary: Get the next trigger time for a reminder
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Trigger info for the reminder
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TriggerResult"
+        "404":
+          description: Reminder not found
+
+  /accountability/status:
+    get:
+      tags: [Accountability]
+      summary: Get the user's accountability and momentum status
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Accountability status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountabilityStatus"
+
+  /checkins/stagnation/{planId}:
+    get:
+      tags: [Checkins]
+      summary: Detect stagnation for a growth plan
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Stagnation status for the plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StagnationResult"
+        "404":
+          description: Plan not found
+
+  /obstacles/{id}/help:
+    post:
+      tags: [Obstacles]
+      summary: Get AI-generated help for overcoming an obstacle
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ObstacleHelpBody"
+      responses:
+        "200":
+          description: AI help for the obstacle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObstacleHelpResponse"
+        "404":
+          description: Obstacle not found
+
+  /growth/plans/{id}/summary:
+    get:
+      tags: [Growth]
+      summary: Get an AI-generated period summary for a growth plan
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 30
+      responses:
+        "200":
+          description: Period summary for the plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PeriodSummaryResponse"
+        "404":
+          description: Plan not found
+
+  /ai/extract-themes:
+    post:
+      tags: [AI]
+      summary: Extract themes from a block of text using AI
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtractThemesBody"
+      responses:
+        "200":
+          description: Extracted themes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtractThemesResponse"
+
+  /ai/generate-insights:
+    post:
+      tags: [AI]
+      summary: Generate insight cards from a discovery context using AI
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateInsightsBody"
+      responses:
+        "200":
+          description: Generated insight cards
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateInsightsResponse"
+
+  /goals:
+    get:
+      operationId: listGoals
+      tags: [Goals]
+      summary: List all goals for the current user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of goals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Goal"
+    post:
+      operationId: createGoal
+      tags: [Goals]
+      summary: Create a new goal
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGoalBody"
+      responses:
+        "201":
+          description: Created goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+
+  /goals/{id}:
+    get:
+      operationId: getGoal
+      tags: [Goals]
+      summary: Get a specific goal by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Goal details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+        "404":
+          description: Goal not found
+    put:
+      operationId: updateGoal
+      tags: [Goals]
+      summary: Update a goal
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGoalBody"
+      responses:
+        "200":
+          description: Updated goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+        "404":
+          description: Goal not found
+    delete:
+      operationId: deleteGoal
+      tags: [Goals]
+      summary: Delete a goal
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /opportunity-paths:
+    get:
+      operationId: listOpportunityPaths
+      tags: [Goals]
+      summary: List all opportunity paths for the current user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of opportunity paths
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OpportunityPath"
+    post:
+      operationId: createOpportunityPath
+      tags: [Goals]
+      summary: Create a new opportunity path
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOpportunityPathBody"
+      responses:
+        "201":
+          description: Created opportunity path
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpportunityPath"
+
+  /opportunity-paths/{id}:
+    get:
+      operationId: getOpportunityPath
+      tags: [Goals]
+      summary: Get a specific opportunity path
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Opportunity path details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpportunityPath"
+        "404":
+          description: Not found
+    put:
+      operationId: updateOpportunityPath
+      tags: [Goals]
+      summary: Update an opportunity path
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOpportunityPathBody"
+      responses:
+        "200":
+          description: Updated opportunity path
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OpportunityPath"
+    delete:
+      operationId: deleteOpportunityPath
+      tags: [Goals]
+      summary: Delete an opportunity path
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /insights:
+    get:
+      operationId: listInsights
+      tags: [Insights]
+      summary: List all insights for the current user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of insights
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Insight"
+    post:
+      operationId: createInsight
+      tags: [Insights]
+      summary: Create a new insight
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInsightBody"
+      responses:
+        "201":
+          description: Created insight
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Insight"
+
+  /insights/{id}:
+    get:
+      operationId: getInsight
+      tags: [Insights]
+      summary: Get a specific insight
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Insight details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Insight"
+        "404":
+          description: Not found
+    put:
+      operationId: updateInsight
+      tags: [Insights]
+      summary: Update an insight
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateInsightBody"
+      responses:
+        "200":
+          description: Updated insight
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Insight"
+    delete:
+      operationId: deleteInsight
+      tags: [Insights]
+      summary: Delete an insight
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /themes:
+    get:
+      operationId: listThemes
+      tags: [Insights]
+      summary: List all themes for the current user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of themes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Theme"
+    post:
+      operationId: createTheme
+      tags: [Insights]
+      summary: Create a new theme
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateThemeBody"
+      responses:
+        "201":
+          description: Created theme
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Theme"
+
+  /themes/{id}:
+    put:
+      operationId: updateTheme
+      tags: [Insights]
+      summary: Update a theme
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateThemeBody"
+      responses:
+        "200":
+          description: Updated theme
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Theme"
+    delete:
+      operationId: deleteTheme
+      tags: [Insights]
+      summary: Delete a theme
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /reminders:
+    get:
+      operationId: listReminders
+      tags: [Reminders]
+      summary: List all reminders for the current user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: List of reminders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reminder"
+    post:
+      operationId: createReminder
+      tags: [Reminders]
+      summary: Create a new reminder
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReminderBody"
+      responses:
+        "201":
+          description: Created reminder
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reminder"
+
+  /reminders/{id}:
+    delete:
+      operationId: deleteReminder
+      tags: [Reminders]
+      summary: Delete a reminder
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /hypotheses/compare:
+    get:
+      operationId: compareHypotheses
+      tags: [Hypotheses]
+      summary: Compare multiple hypotheses by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: ids
+          required: true
+          schema:
+            type: string
+          description: Comma-separated hypothesis IDs (min 2)
+      responses:
+        "200":
+          description: Hypothesis comparison result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  hypotheses:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/IkigaiHypothesis"
+        "400":
+          description: Invalid or insufficient IDs
+        "404":
+          description: One or more hypotheses not found
+
+  /coaching/sessions/{id}/messages:
+    post:
+      operationId: sendCoachingMessage
+      tags: [Coaching]
+      summary: Send a message in a coaching session (SSE stream)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendCoachingMessageBody"
+      responses:
+        "200":
+          description: SSE stream of coaching response chunks
+          content:
+            text/event-stream: {}
+        "404":
+          description: Session not found
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        clerkId:
+          type: string
+        email:
+          type: string
+        displayName:
+          type: string
+        timezone:
+          type: string
+        onboardingCompleted:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - clerkId
+        - email
+        - onboardingCompleted
+        - createdAt
+        - updatedAt
+
+    UpdateUserBody:
+      type: object
+      properties:
+        displayName:
+          type: string
+        timezone:
+          type: string
+        onboardingCompleted:
+          type: boolean
+
+    UserPreferences:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        coachingTone:
+          type: string
+          enum: [supportive, direct, challenging, gentle]
+        checkInFrequency:
+          type: string
+          enum: [daily, weekly, biweekly, monthly]
+        checkInDayOfWeek:
+          type: integer
+        notificationsEnabled:
+          type: boolean
+        aiEnabled:
+          type: boolean
+        discoveryMode:
+          type: string
+          enum: [quick, deep]
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - coachingTone
+        - checkInFrequency
+        - notificationsEnabled
+        - aiEnabled
+        - updatedAt
+
+    UpdateUserPreferencesBody:
+      type: object
+      properties:
+        coachingTone:
+          type: string
+          enum: [supportive, direct, challenging, gentle]
+        checkInFrequency:
+          type: string
+          enum: [daily, weekly, biweekly, monthly]
+        checkInDayOfWeek:
+          type: integer
+        notificationsEnabled:
+          type: boolean
+        aiEnabled:
+          type: boolean
+        discoveryMode:
+          type: string
+          enum: [quick, deep]
+
+    DiscoverySession:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        status:
+          type: string
+          enum: [in_progress, completed]
+        currentStep:
+          type: integer
+        totalSteps:
+          type: integer
+        completedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - status
+        - currentStep
+        - totalSteps
+        - createdAt
+        - updatedAt
+
+    DiscoverySessionWithAnswers:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        status:
+          type: string
+          enum: [in_progress, completed]
+        currentStep:
+          type: integer
+        totalSteps:
+          type: integer
+        answers:
+          type: object
+          additionalProperties: {}
+        themes:
+          type: array
+          items:
+            type: string
+        completedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - status
+        - currentStep
+        - totalSteps
+        - answers
+        - themes
+        - createdAt
+        - updatedAt
+
+    CreateDiscoverySessionBody:
+      type: object
+      properties:
+        mode:
+          type: string
+          enum: [quick, deep]
+      required:
+        - mode
+
+    UpdateDiscoverySessionBody:
+      type: object
+      properties:
+        currentStep:
+          type: integer
+        answers:
+          type: object
+          additionalProperties: {}
+
+    ReflectionEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        sessionId:
+          type: integer
+        prompt:
+          type: string
+        content:
+          type: string
+        aiSummary:
+          type: string
+        themes:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - prompt
+        - content
+        - themes
+        - createdAt
+        - updatedAt
+
+    CreateReflectionBody:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+        prompt:
+          type: string
+        content:
+          type: string
+      required:
+        - prompt
+        - content
+
+    UpdateReflectionBody:
+      type: object
+      properties:
+        content:
+          type: string
+
+    IkigaiHypothesis:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        sessionId:
+          type: integer
+        version:
+          type: integer
+        title:
+          type: string
+        summary:
+          type: string
+        detailedExplanation:
+          type: string
+        supportingEvidence:
+          type: array
+          items:
+            type: string
+        uncertaintyLevel:
+          type: string
+          enum: [low, medium, high]
+        resonanceScore:
+          type: number
+        themes:
+          type: array
+          items:
+            type: string
+        suggestedExperiments:
+          type: array
+          items:
+            type: string
+        alternativeInterpretations:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [draft, accepted, archived]
+        isAiGenerated:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - version
+        - title
+        - summary
+        - uncertaintyLevel
+        - themes
+        - status
+        - isAiGenerated
+        - createdAt
+        - updatedAt
+
+    CreateHypothesisBody:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+        title:
+          type: string
+        summary:
+          type: string
+        detailedExplanation:
+          type: string
+        uncertaintyLevel:
+          type: string
+          enum: [low, medium, high]
+        resonanceScore:
+          type: number
+        themes:
+          type: array
+          items:
+            type: string
+      required:
+        - title
+        - summary
+        - uncertaintyLevel
+        - themes
+
+    UpdateHypothesisBody:
+      type: object
+      properties:
+        title:
+          type: string
+        summary:
+          type: string
+        detailedExplanation:
+          type: string
+        uncertaintyLevel:
+          type: string
+          enum: [low, medium, high]
+        resonanceScore:
+          type: number
+        themes:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [draft, accepted, archived]
+
+    SynthesizeHypothesesBody:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+      required:
+        - sessionId
+
+    GrowthPlan:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        hypothesisId:
+          type: integer
+        title:
+          type: string
+        longTermDirection:
+          type: string
+        ninetyDaySummary:
+          type: string
+        status:
+          type: string
+          enum: [active, paused, completed, archived]
+        startDate:
+          type: string
+          format: date
+        targetEndDate:
+          type: string
+          format: date
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - title
+        - longTermDirection
+        - status
+        - createdAt
+        - updatedAt
+
+    GrowthPlanWithDetails:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        hypothesisId:
+          type: integer
+        title:
+          type: string
+        longTermDirection:
+          type: string
+        ninetyDaySummary:
+          type: string
+        status:
+          type: string
+          enum: [active, paused, completed, archived]
+        startDate:
+          type: string
+          format: date
+        targetEndDate:
+          type: string
+          format: date
+        milestones:
+          type: array
+          items:
+            $ref: "#/components/schemas/Milestone"
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/TaskAction"
+        habits:
+          type: array
+          items:
+            $ref: "#/components/schemas/Habit"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - title
+        - longTermDirection
+        - status
+        - milestones
+        - actions
+        - habits
+        - createdAt
+        - updatedAt
+
+    CreateGrowthPlanBody:
+      type: object
+      properties:
+        hypothesisId:
+          type: integer
+        title:
+          type: string
+        longTermDirection:
+          type: string
+        ninetyDaySummary:
+          type: string
+        startDate:
+          type: string
+          format: date
+        targetEndDate:
+          type: string
+          format: date
+      required:
+        - title
+        - longTermDirection
+
+    UpdateGrowthPlanBody:
+      type: object
+      properties:
+        title:
+          type: string
+        longTermDirection:
+          type: string
+        ninetyDaySummary:
+          type: string
+        status:
+          type: string
+          enum: [active, paused, completed, archived]
+        targetEndDate:
+          type: string
+          format: date
+
+    Milestone:
+      type: object
+      properties:
+        id:
+          type: integer
+        planId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        targetDate:
+          type: string
+          format: date
+        completedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [pending, in_progress, completed, skipped]
+        horizon:
+          type: string
+          enum: [monthly, quarterly, annual]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - planId
+        - title
+        - status
+        - horizon
+        - createdAt
+        - updatedAt
+
+    CreateMilestoneBody:
+      type: object
+      properties:
+        planId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        targetDate:
+          type: string
+          format: date
+        horizon:
+          type: string
+          enum: [monthly, quarterly, annual]
+      required:
+        - planId
+        - title
+        - horizon
+
+    UpdateMilestoneBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        targetDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [pending, in_progress, completed, skipped]
+
+    TaskAction:
+      type: object
+      properties:
+        id:
+          type: integer
+        planId:
+          type: integer
+        milestoneId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        weekOf:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [pending, completed, skipped]
+        completedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - planId
+        - title
+        - status
+        - createdAt
+
+    CreateTaskActionBody:
+      type: object
+      properties:
+        planId:
+          type: integer
+        milestoneId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        weekOf:
+          type: string
+          format: date
+      required:
+        - planId
+        - title
+
+    UpdateTaskActionBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [pending, completed, skipped]
+        weekOf:
+          type: string
+          format: date
+
+    Habit:
+      type: object
+      properties:
+        id:
+          type: integer
+        planId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        frequency:
+          type: string
+          enum: [daily, weekdays, weekly]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - planId
+        - title
+        - frequency
+        - isActive
+        - createdAt
+
+    CreateHabitBody:
+      type: object
+      properties:
+        planId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        frequency:
+          type: string
+          enum: [daily, weekdays, weekly]
+      required:
+        - planId
+        - title
+        - frequency
+
+    UpdateHabitBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        frequency:
+          type: string
+          enum: [daily, weekdays, weekly]
+        isActive:
+          type: boolean
+
+    CheckIn:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        planId:
+          type: integer
+        period:
+          type: string
+        plannedActions:
+          type: string
+        actualActions:
+          type: string
+        blockers:
+          type: string
+        energyLevel:
+          type: integer
+        satisfactionLevel:
+          type: integer
+        nextSteps:
+          type: string
+        aiSuggestions:
+          type: string
+        momentumScore:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - period
+        - createdAt
+
+    CreateCheckInBody:
+      type: object
+      properties:
+        planId:
+          type: integer
+        period:
+          type: string
+        plannedActions:
+          type: string
+        actualActions:
+          type: string
+        blockers:
+          type: string
+        energyLevel:
+          type: integer
+        satisfactionLevel:
+          type: integer
+        nextSteps:
+          type: string
+      required:
+        - period
+
+    CoachingSession:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        type:
+          type: string
+          enum: [general, obstacle, replan, reflection, celebration]
+        title:
+          type: string
+        status:
+          type: string
+          enum: [active, completed]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - type
+        - title
+        - status
+        - createdAt
+        - updatedAt
+
+    CoachingSessionWithMessages:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        type:
+          type: string
+          enum: [general, obstacle, replan, reflection, celebration]
+        title:
+          type: string
+        status:
+          type: string
+          enum: [active, completed]
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/CoachingMessage"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - type
+        - title
+        - status
+        - messages
+        - createdAt
+        - updatedAt
+
+    CoachingMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        sessionId:
+          type: integer
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - sessionId
+        - role
+        - content
+        - createdAt
+
+    CreateCoachingSessionBody:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [general, obstacle, replan, reflection, celebration]
+        title:
+          type: string
+        contextObstacleId:
+          type: integer
+        contextPlanId:
+          type: integer
+      required:
+        - type
+        - title
+
+    Obstacle:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        planId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [time, energy, skills, resources, motivation, external, other]
+        status:
+          type: string
+          enum: [active, resolved, accepted]
+        aiSuggestions:
+          type: string
+        resolvedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - title
+        - category
+        - status
+        - createdAt
+        - updatedAt
+
+    CreateObstacleBody:
+      type: object
+      properties:
+        planId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [time, energy, skills, resources, motivation, external, other]
+      required:
+        - title
+        - category
+
+    UpdateObstacleBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [time, energy, skills, resources, motivation, external, other]
+        status:
+          type: string
+          enum: [active, resolved, accepted]
+
+    DashboardSummary:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        activeHypothesis:
+          $ref: "#/components/schemas/IkigaiHypothesis"
+        activePlan:
+          $ref: "#/components/schemas/GrowthPlan"
+        momentumScore:
+          type: number
+        momentumLabel:
+          type: string
+        momentumExplanation:
+          type: string
+        pendingActionsCount:
+          type: integer
+        completedActionsThisWeek:
+          type: integer
+        activeObstaclesCount:
+          type: integer
+        upcomingMilestones:
+          type: array
+          items:
+            $ref: "#/components/schemas/Milestone"
+        recentCheckIn:
+          $ref: "#/components/schemas/CheckIn"
+        discoveryComplete:
+          type: boolean
+        hasHypothesis:
+          type: boolean
+        hasPlan:
+          type: boolean
+      required:
+        - momentumScore
+        - momentumLabel
+        - momentumExplanation
+        - pendingActionsCount
+        - completedActionsThisWeek
+        - activeObstaclesCount
+        - upcomingMilestones
+        - discoveryComplete
+        - hasHypothesis
+        - hasPlan
+
+    ProgressSnapshot:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        planId:
+          type: integer
+        week:
+          type: string
+          format: date
+        momentumScore:
+          type: number
+        actionsCompleted:
+          type: integer
+        actionsTotal:
+          type: integer
+        energyAvg:
+          type: number
+        satisfactionAvg:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - week
+        - momentumScore
+        - actionsCompleted
+        - actionsTotal
+        - createdAt
+
+    ActivityEvent:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [check_in, milestone_completed, obstacle_logged, reflection_added, hypothesis_accepted, plan_created]
+        title:
+          type: string
+        description:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - title
+        - timestamp
+
+    OpenaiConversation:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - createdAt
+
+    OpenaiMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        role:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - conversationId
+        - role
+        - content
+        - createdAt
+
+    CreateOpenaiConversationBody:
+      type: object
+      properties:
+        title:
+          type: string
+      required:
+        - title
+
+    SendOpenaiMessageBody:
+      type: object
+      properties:
+        content:
+          type: string
+      required:
+        - content
+
+    OpenaiConversationWithMessages:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/OpenaiMessage"
+      required:
+        - id
+        - title
+        - createdAt
+        - messages
+
+    OpenaiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    TriggerResult:
+      type: object
+      properties:
+        lastOccurrenceAt:
+          type: string
+          format: date-time
+        nextRunAt:
+          type: string
+          format: date-time
+        nextRunAtLocal:
+          type: string
+        isDue:
+          type: boolean
+        frequency:
+          type: string
+        timezone:
+          type: string
+      required:
+        - lastOccurrenceAt
+        - nextRunAt
+        - nextRunAtLocal
+        - isDue
+        - frequency
+        - timezone
+
+    ReminderWithTrigger:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        type:
+          type: string
+        frequency:
+          type: string
+        dayOfWeek:
+          type: integer
+        hourOfDay:
+          type: integer
+        timezone:
+          type: string
+        isActive:
+          type: boolean
+        planId:
+          type: integer
+        trigger:
+          $ref: "#/components/schemas/TriggerResult"
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - type
+        - frequency
+        - isActive
+        - trigger
+        - createdAt
+
+    AccountabilityStatus:
+      type: object
+      properties:
+        isStagnant:
+          type: boolean
+        daysSinceLastCheckin:
+          type: integer
+        stagnationThresholdDays:
+          type: integer
+        triggers:
+          type: array
+          items:
+            $ref: "#/components/schemas/TriggerResult"
+        activeReminders:
+          type: integer
+      required:
+        - isStagnant
+        - daysSinceLastCheckin
+        - stagnationThresholdDays
+        - activeReminders
+
+    StagnationResult:
+      type: object
+      properties:
+        isStagnant:
+          type: boolean
+        daysSinceLastCheckin:
+          type: integer
+        thresholdDays:
+          type: integer
+        planId:
+          type: integer
+      required:
+        - isStagnant
+        - daysSinceLastCheckin
+        - thresholdDays
+
+    ObstacleHelpBody:
+      type: object
+      properties:
+        context:
+          type: string
+
+    ObstacleHelpResponse:
+      type: object
+      properties:
+        reframe:
+          type: string
+        rootCauses:
+          type: array
+          items:
+            type: string
+        strategies:
+          type: array
+          items:
+            type: string
+        reflectionQuestions:
+          type: array
+          items:
+            type: string
+        isAiGenerated:
+          type: boolean
+      required:
+        - reframe
+        - rootCauses
+        - strategies
+        - reflectionQuestions
+        - isAiGenerated
+
+    PeriodSummaryResponse:
+      type: object
+      properties:
+        headline:
+          type: string
+        wins:
+          type: array
+          items:
+            type: string
+        insights:
+          type: array
+          items:
+            type: string
+        nextFocus:
+          type: array
+          items:
+            type: string
+        momentumScore:
+          type: number
+        isAiGenerated:
+          type: boolean
+        planId:
+          type: integer
+        periodDays:
+          type: integer
+      required:
+        - headline
+        - wins
+        - insights
+        - nextFocus
+        - momentumScore
+        - isAiGenerated
+        - planId
+        - periodDays
+
+    ExtractThemesBody:
+      type: object
+      properties:
+        text:
+          type: string
+        sessionId:
+          type: integer
+      required:
+        - text
+
+    ExtractThemesResponse:
+      type: object
+      properties:
+        themes:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              description:
+                type: string
+              keywords:
+                type: array
+                items:
+                  type: string
+        isAiGenerated:
+          type: boolean
+      required:
+        - themes
+        - isAiGenerated
+
+    GenerateInsightsBody:
+      type: object
+      properties:
+        context:
+          type: string
+        sessionId:
+          type: integer
+        hypothesisId:
+          type: integer
+      required:
+        - context
+
+    GenerateInsightsResponse:
+      type: object
+      properties:
+        insights:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              content:
+                type: string
+              category:
+                type: string
+        isAiGenerated:
+          type: boolean
+      required:
+        - insights
+        - isAiGenerated
+
+    Goal:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [active, completed, archived]
+        priority:
+          type: string
+          enum: [low, medium, high]
+        targetDate:
+          type: string
+        ikigaiQuadrant:
+          type: string
+        planId:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - userId
+        - title
+        - status
+        - createdAt
+        - updatedAt
+
+    CreateGoalBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [active, completed, archived]
+        priority:
+          type: string
+          enum: [low, medium, high]
+        targetDate:
+          type: string
+        ikigaiQuadrant:
+          type: string
+        planId:
+          type: integer
+      required:
+        - title
+
+    UpdateGoalBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [active, completed, archived]
+        priority:
+          type: string
+          enum: [low, medium, high]
+        targetDate:
+          type: string
+        ikigaiQuadrant:
+          type: string
+
+    OpportunityPath:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        feasibilityScore:
+          type: integer
+        alignmentScore:
+          type: integer
+        impactScore:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - userId
+        - title
+        - createdAt
+        - updatedAt
+
+    CreateOpportunityPathBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        feasibilityScore:
+          type: integer
+        alignmentScore:
+          type: integer
+        impactScore:
+          type: integer
+      required:
+        - title
+
+    UpdateOpportunityPathBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        feasibilityScore:
+          type: integer
+        alignmentScore:
+          type: integer
+        impactScore:
+          type: integer
+
+    Insight:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+        sourceType:
+          type: string
+        isAiGenerated:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - userId
+        - title
+        - content
+        - createdAt
+        - updatedAt
+
+    CreateInsightBody:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+        sourceType:
+          type: string
+      required:
+        - title
+        - content
+
+    UpdateInsightBody:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+
+    Theme:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        frequency:
+          type: integer
+        isAiExtracted:
+          type: boolean
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - userId
+        - name
+        - createdAt
+        - updatedAt
+
+    CreateThemeBody:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        frequency:
+          type: integer
+      required:
+        - name
+
+    UpdateThemeBody:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        frequency:
+          type: integer
+
+    Reminder:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        type:
+          type: string
+        frequency:
+          type: string
+          enum: [daily, weekly, monthly]
+        scheduledTime:
+          type: string
+        isActive:
+          type: boolean
+        lastTriggeredAt:
+          type: string
+        nextTriggerAt:
+          type: string
+        planId:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - userId
+        - type
+        - frequency
+        - isActive
+        - createdAt
+        - updatedAt
+
+    CreateReminderBody:
+      type: object
+      properties:
+        type:
+          type: string
+        frequency:
+          type: string
+          enum: [daily, weekly, monthly]
+        scheduledTime:
+          type: string
+        planId:
+          type: integer
+      required:
+        - type
+        - frequency
+
+    SendCoachingMessageBody:
+      type: object
+      properties:
+        content:
+          type: string
+      required:
+        - content

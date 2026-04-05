@@ -1,0 +1,623 @@
+Build a production-quality app called Ikigai Compass.
+
+This app helps users discover their Ikigai and then coaches them through creating and following a realistic plan to pursue it over time. The app must be mobile-first, highly intuitive, visually engaging, AI-assisted where helpful, and robustly tested.
+
+Build this as a complete, deployable Replit app with source code, working UI, backend logic, persistent data storage, automated tests, documentation, diagrams, and deployment readiness.
+
+Platform expectations for Replit
+
+Use Replit in a way that fits its environment:
+	•	create a full-stack web app that runs well inside Replit and can be deployed from Replit,
+	•	keep setup simple and reproducible,
+	•	use environment variables / secrets correctly for API keys and sensitive settings,
+	•	ensure the app has a clear run command and build process,
+	•	structure the project so it is easy to extend in future Replit iterations,
+	•	separate development and deployment concerns cleanly,
+	•	document exactly how to run, test, and deploy from Replit. Replit supports browser-based app creation, deployment workflows, app configuration including run/build settings, and secrets for deployments. Published/deployed apps are isolated from the workspace version, and deployment secrets need to be configured explicitly.  ￼
+
+⸻
+
+1) Product goal
+
+Build an application that acts as both:
+	•	a guided discovery tool for helping a person determine their Ikigai,
+	•	and an ongoing coach for helping them pursue it with realistic planning, accountability, and adaptation.
+
+The app must help users:
+	•	identify interests, strengths, values, motivations, energy sources, and real-world constraints,
+	•	synthesize those into one or more Ikigai Hypotheses,
+	•	choose or refine a direction,
+	•	convert it into a realistic multi-horizon plan,
+	•	stay accountable over time,
+	•	navigate obstacles,
+	•	and periodically reassess whether their plan and Ikigai still fit.
+
+The experience should feel insightful, supportive, practical, and motivating.
+
+⸻
+
+2) Shared product vocabulary
+
+Use these exact terms consistently in the UI, code, documentation, analytics, and future iterations:
+	•	Ikigai: a user’s evolving sense of meaningful direction derived from what they love, what they are good at or can become good at, what matters to them, and what realistically fits their life and can contribute value.
+	•	Ikigai Hypothesis: a versioned draft articulation of the user’s current best understanding of their Ikigai.
+	•	Discovery Flow: the guided onboarding and reflection process for uncovering patterns.
+	•	Insight Card: a structured, concise observation derived from user inputs.
+	•	Theme: a recurring pattern such as creativity, service, mastery, teaching, autonomy, or craftsmanship.
+	•	Constraint: a real-life condition or limitation that the plan must respect.
+	•	Opportunity Path: a practical route aligned with the user’s Ikigai, such as a career shift, creative practice, side project, volunteer path, or learning path.
+	•	Growth Plan: a structured plan consisting of goals, milestones, habits, routines, and review points.
+	•	Milestone: a measurable checkpoint with completion criteria.
+	•	Accountability Check-In: a periodic progress review comparing intention, action, blockers, and next steps.
+	•	Obstacle: anything impeding progress.
+	•	Coaching Session: a guided interaction that helps the user reflect, decide, plan, recover, or reframe.
+	•	Momentum Score: an explainable, supportive measure of whether the user is progressing according to their own plan.
+	•	Reflection: a guided or open-ended journal entry used to learn and adapt.
+	•	Replan: a structured revision of goals, pace, habits, or approach.
+
+⸻
+
+3) User experience priorities
+
+Prioritize these in order:
+
+Priority 1: Extremely easy and intuitive UX
+	•	mobile-first layout,
+	•	excellent small-screen experience,
+	•	equally strong desktop web experience,
+	•	low-friction onboarding,
+	•	progressive disclosure,
+	•	short steps,
+	•	clear calls to action,
+	•	low cognitive load,
+	•	autosave everywhere appropriate.
+
+Priority 2: Strong visual and graphical representation
+
+Include responsive visuals that help the user think and stay motivated:
+	•	Ikigai overlap visualization,
+	•	theme clusters,
+	•	strengths/values/interests maps,
+	•	energy vs. fulfillment chart,
+	•	milestone roadmap,
+	•	weekly momentum dashboard,
+	•	opportunity path comparison cards,
+	•	progress timeline,
+	•	accountability trend views.
+
+Priority 3: Actionable outcomes
+
+The app must not stop at self-discovery. It must help the user make and follow a realistic plan.
+
+Priority 4: Adaptability
+
+Treat the user’s Ikigai as an evolving hypothesis, not a fixed verdict.
+
+Priority 5: Emotional intelligence and safety
+
+Be supportive without being vague, manipulative, or overconfident.
+
+⸻
+
+4) Main flows to implement
+
+A. Onboarding
+
+Provide:
+	•	welcome screen,
+	•	simple explanation of purpose,
+	•	optional sign-in or local/demo mode,
+	•	intake questions about current situation, goals, available time, and preferred coaching tone,
+	•	explanation of privacy and AI usage.
+
+B. Discovery Flow
+
+Guide the user through structured inputs to uncover:
+	•	interests,
+	•	passions,
+	•	strengths,
+	•	skills,
+	•	values,
+	•	energizing activities,
+	•	draining activities,
+	•	admired roles or people,
+	•	desired contribution,
+	•	ideal lifestyle factors,
+	•	fears and blockers,
+	•	important past moments,
+	•	current real-world constraints.
+
+Use multiple input patterns:
+	•	cards,
+	•	sliders,
+	•	ranking,
+	•	multiple choice,
+	•	drag-and-drop grouping,
+	•	short reflection prompts,
+	•	optional journaling.
+
+C. Ikigai synthesis
+
+Generate one or more Ikigai Hypotheses with:
+	•	concise summary,
+	•	detailed explanation,
+	•	supporting evidence from user inputs,
+	•	uncertainty indicators,
+	•	alternative interpretations,
+	•	suggested next experiments.
+
+Let the user:
+	•	edit,
+	•	compare,
+	•	accept,
+	•	reject,
+	•	save,
+	•	version,
+	•	and revisit hypotheses.
+
+D. Growth planning
+
+Translate the selected Ikigai Hypothesis into a realistic Growth Plan:
+	•	long-term direction,
+	•	90-day plan,
+	•	monthly milestones,
+	•	weekly action plan,
+	•	optional daily habits,
+	•	risks and mitigations,
+	•	accountability cadence,
+	•	fallback and replan options.
+
+This plan must account for time, energy, existing obligations, and constraints.
+
+E. Ongoing coaching
+
+Provide:
+	•	AI-assisted coaching sessions,
+	•	obstacle diagnosis,
+	•	reflection prompts,
+	•	progress reviews,
+	•	motivation support,
+	•	replanning assistance,
+	•	celebration of wins,
+	•	stagnation detection.
+
+F. Accountability loop
+
+At configurable intervals:
+	•	ask what the user planned to do,
+	•	record what actually happened,
+	•	capture blockers,
+	•	suggest next steps,
+	•	adjust the plan when needed,
+	•	keep the user engaged compassionately.
+
+G. Review and adaptation
+
+At periodic intervals:
+	•	reassess whether the Ikigai Hypothesis still fits,
+	•	identify what is energizing or draining,
+	•	recommend refinements,
+	•	allow structured replanning.
+
+⸻
+
+5) Required product features
+
+Implement at minimum:
+
+User and preferences
+	•	user account or app profile support,
+	•	saved user state,
+	•	timezone-aware reminders and check-ins,
+	•	coaching tone preferences,
+	•	privacy and AI preference settings.
+
+Discovery system
+	•	guided discovery flow,
+	•	reflection capture,
+	•	theme extraction,
+	•	insight generation,
+	•	hypothesis creation,
+	•	hypothesis versioning.
+
+Planning system
+	•	goals,
+	•	milestones,
+	•	weekly action items,
+	•	optional habits/routines,
+	•	obstacle tracking,
+	•	replan workflow.
+
+Ongoing support
+	•	scheduled accountability check-ins,
+	•	reflection history,
+	•	progress dashboard,
+	•	coaching interface,
+	•	missed-check-in recovery.
+
+Visualizations
+	•	responsive diagrams and dashboards that work well on mobile and desktop.
+
+AI integration
+
+Use an AI provider such as OpenAI for:
+	•	summarizing reflections,
+	•	extracting themes,
+	•	generating insight cards,
+	•	coaching sessions,
+	•	obstacle-solving suggestions,
+	•	periodic summary generation.
+
+Keep deterministic app logic for:
+	•	scheduling,
+	•	state transitions,
+	•	reminders,
+	•	calculations,
+	•	milestone tracking,
+	•	validation,
+	•	persistence rules.
+
+Reliability and observability
+	•	error handling,
+	•	loading states,
+	•	empty states,
+	•	analytics events,
+	•	internal logs where appropriate,
+	•	prompt version tracking for AI-related features.
+
+⸻
+
+6) Important additional features to include
+
+Please add thoughtful features expected in a strong app of this type, including:
+	•	quick-start mode and deep-reflection mode,
+	•	experiment-based next steps before major life changes,
+	•	confidence/resonance indicators for hypotheses,
+	•	“restart this week” support after user drift,
+	•	support for uncertain or overwhelmed users,
+	•	exportable summary or report of current Ikigai and plan,
+	•	clear disclaimers that the app is not therapy, medical advice, legal advice, or financial advice,
+	•	inclusive and accessible design,
+	•	privacy-aware handling of sensitive reflections,
+	•	optional offline-tolerant draft entry if practical.
+
+⸻
+
+7) Design and UX requirements
+
+Build a polished, warm, modern interface with:
+	•	strong information hierarchy,
+	•	calm and motivating visual tone,
+	•	large touch targets,
+	•	minimal friction,
+	•	concise copy,
+	•	clean empty states,
+	•	clear progress indicators,
+	•	friendly but not childish tone.
+
+Required behaviors:
+	•	autosave,
+	•	recover unsaved progress where feasible,
+	•	confirmation on destructive actions,
+	•	graceful handling of slow or failed AI responses,
+	•	clear AI-generated labels and explanations,
+	•	accessible focus states,
+	•	keyboard support for web,
+	•	reduced motion support,
+	•	sufficient contrast.
+
+⸻
+
+8) Technical implementation guidance for Replit
+
+Choose a modern stack that works well in Replit and is easy to run and deploy there. Replit supports app configuration for entrypoint, run command, build phase, env vars, and deployment configuration.  ￼
+
+Use a practical architecture with:
+	•	frontend,
+	•	backend/API,
+	•	persistent data layer,
+	•	AI service layer,
+	•	scheduling/check-in system,
+	•	notification/reminder service abstraction,
+	•	analytics/observability.
+
+Prefer a stack that is stable, common, and testable. If not otherwise constrained, choose a sensible stack and explain the choice in documentation.
+
+Structure the repository clearly, for example:
+	•	/app or /frontend
+	•	/server or /backend
+	•	/shared
+	•	/docs
+	•	/tests
+	•	/scripts
+
+Also ensure:
+	•	a clean run command,
+	•	a clean build command if required,
+	•	local and Replit-friendly environment setup,
+	•	clear handling of secrets like OPENAI_API_KEY,
+	•	deployment-ready instructions specific to Replit,
+	•	no secrets committed to source.
+
+Since Replit deployment secrets are managed separately from workspace secrets, explicitly document what must be configured before production deployment.  ￼
+
+⸻
+
+9) Data model expectations
+
+Design and implement a clear schema for key entities such as:
+	•	User
+	•	UserPreferences
+	•	DiscoverySession
+	•	ReflectionEntry
+	•	InsightCard
+	•	Theme
+	•	IkigaiHypothesis
+	•	OpportunityPath
+	•	GrowthPlan
+	•	Goal
+	•	Milestone
+	•	TaskAction
+	•	Habit
+	•	CheckIn
+	•	Obstacle
+	•	CoachingSession
+	•	ReminderSchedule
+	•	ProgressSnapshot
+	•	Notification
+	•	AuditEvent
+	•	PromptTemplateVersion
+	•	AIInteractionLog
+	•	ConsentRecord
+
+Document relationships and lifecycle states.
+
+⸻
+
+10) AI requirements
+
+AI usage goals
+
+Use AI for interpretation, coaching, summarization, and adaptive support.
+
+AI behavior requirements
+
+AI responses must be:
+	•	empathetic,
+	•	practical,
+	•	specific,
+	•	non-judgmental,
+	•	grounded in the user’s own inputs,
+	•	transparent about uncertainty.
+
+AI safety and quality
+
+Avoid:
+	•	overclaiming,
+	•	false certainty,
+	•	shame-inducing language,
+	•	harmful advice,
+	•	pretending to know more than the user shared.
+
+Include:
+	•	safe handling of sensitive emotional content,
+	•	escalation guidance when appropriate,
+	•	fallback behavior when AI output is malformed or unavailable,
+	•	structured output formats for important AI calls where possible.
+
+AI maintainability
+	•	centralize prompts,
+	•	version prompt templates,
+	•	log prompt version references,
+	•	make AI interactions testable,
+	•	support swapping the AI provider later if needed.
+
+⸻
+
+11) Automated testing requirements
+
+Testing is mandatory. Build a comprehensive automated testing strategy that proactively catches places where the app behaves differently than expected.
+
+A. Unit tests
+
+Cover:
+	•	validation logic,
+	•	state transitions,
+	•	scheduling logic,
+	•	reminder cadence,
+	•	hypothesis versioning,
+	•	milestone and plan logic,
+	•	date/timezone handling,
+	•	AI response parsing,
+	•	fallback handling,
+	•	Momentum Score logic,
+	•	permissions and safety checks.
+
+B. Integration tests
+
+Cover:
+	•	onboarding to discovery flow,
+	•	discovery to hypothesis generation,
+	•	hypothesis selection to plan creation,
+	•	check-in submissions updating progress state,
+	•	obstacle logging to coaching recommendations,
+	•	database persistence,
+	•	AI service integration with mocks,
+	•	notification scheduling,
+	•	analytics event generation.
+
+C. End-to-end tests
+
+Create realistic scenarios for:
+	•	new user completes onboarding and receives a usable Ikigai Hypothesis,
+	•	user edits and saves a hypothesis,
+	•	user creates a Growth Plan,
+	•	user completes weekly actions,
+	•	user receives and responds to a check-in,
+	•	user logs blockers and uses replan flow,
+	•	mobile viewport experience,
+	•	desktop viewport experience,
+	•	slow network recovery,
+	•	interrupted session recovery.
+
+D. Accessibility tests
+
+Include automated accessibility checks and document manual review steps.
+
+E. Visual regression tests
+
+Where practical, include visual or snapshot checks for:
+	•	core mobile screens,
+	•	dashboard layouts,
+	•	diagrams,
+	•	responsive breakpoints.
+
+F. AI evaluation tests
+
+Create repeatable evaluation fixtures for AI-assisted features. These should test:
+	•	structure correctness,
+	•	alignment with user input,
+	•	empathy quality,
+	•	absence of hallucinated facts,
+	•	contradiction handling,
+	•	safe wording,
+	•	usefulness and actionability,
+	•	proper uncertainty language.
+
+G. Regression discipline
+
+For every bug found:
+	•	create or update a failing automated test,
+	•	fix the issue,
+	•	retain the regression test.
+
+H. CI in Replit-compatible workflow
+
+Set up the project so linting, type checks, tests, and build validation run consistently. If a CI config is included, document how to use it from the repository and how Replit users should validate before deploying. Replit emphasizes in-browser build/run/deploy workflows, so the project should be easy to validate from the workspace as well.  ￼
+
+⸻
+
+12) Documentation deliverables
+
+Create documentation inside the repository.
+
+A. User guide
+
+Write a user-facing guide covering:
+	•	what the app does,
+	•	who it is for,
+	•	how to get started,
+	•	how the discovery flow works,
+	•	how Ikigai Hypotheses work,
+	•	how to create and revise a plan,
+	•	how accountability check-ins work,
+	•	how to handle obstacles,
+	•	how to review progress,
+	•	AI and privacy basics,
+	•	troubleshooting,
+	•	FAQ.
+
+B. Technical documentation
+
+Write technical docs covering:
+	•	architecture overview,
+	•	chosen stack and rationale,
+	•	repository structure,
+	•	data model,
+	•	API or backend design,
+	•	AI integration design,
+	•	prompt versioning strategy,
+	•	scheduling and check-in system,
+	•	auth and permissions,
+	•	deployment instructions for Replit,
+	•	secrets and environment setup,
+	•	testing strategy,
+	•	known risks and limitations,
+	•	future enhancements.
+
+C. Visual diagrams
+
+Include diagrams, ideally in version-controlled text formats such as Mermaid:
+	•	system architecture diagram,
+	•	user journey / flow diagram,
+	•	domain model diagram,
+	•	AI interaction sequence diagram,
+	•	accountability loop workflow diagram,
+	•	deployment diagram if applicable.
+
+⸻
+
+13) Replit-specific deliverables
+
+In addition to the app itself, produce:
+	•	clear project structure suitable for Replit,
+	•	documented run command,
+	•	documented build command if used,
+	•	documented environment variables and secrets,
+	•	deployment guidance for Replit,
+	•	notes about what secrets must be added in deployment,
+	•	a demo mode or seeded sample content so the app is easy to test quickly in Replit,
+	•	graceful behavior if an AI API key is missing,
+	•	comments or docs explaining how to continue iterating inside Replit Agent.
+
+⸻
+
+14) Acceptance criteria
+
+Do not call the app complete unless all are true:
+
+Functional
+	•	users can complete the Discovery Flow,
+	•	the app generates one or more useful Ikigai Hypotheses,
+	•	users can save, edit, and compare hypotheses,
+	•	users can create and revise a Growth Plan,
+	•	the app performs accountability check-ins,
+	•	users can log obstacles and get guidance,
+	•	the app tracks progress over time,
+	•	core visualizations are present and useful,
+	•	mobile UX is strong.
+
+Technical
+	•	app runs reliably in Replit,
+	•	secrets are externalized,
+	•	setup instructions are clear,
+	•	code is organized and maintainable,
+	•	automated tests cover critical paths,
+	•	major failures are handled gracefully,
+	•	deployment readiness is documented.
+
+Documentation
+	•	user guide exists,
+	•	technical docs exist,
+	•	diagrams exist,
+	•	testing strategy is documented,
+	•	assumptions and known limitations are documented,
+	•	next-step roadmap is included.
+
+⸻
+
+15) Final output format from you
+
+When you finish building, provide:
+	1.	a brief app summary,
+	2.	chosen stack and rationale,
+	3.	implemented features summary,
+	4.	automated testing summary,
+	5.	setup and run instructions,
+	6.	Replit deployment instructions,
+	7.	required secrets and environment variables,
+	8.	documentation summary,
+	9.	diagrams summary,
+	10.	known limitations,
+	11.	roadmap for next iterations,
+	12.	assumptions made.
+
+Prefer a robust MVP with strong foundations over a shallow prototype.
+
+⸻
+
+16) Additional implementation notes
+
+The app should feel emotionally intelligent but grounded. It should respect that Ikigai can evolve, that users may be uncertain, and that real life contains constraints. The goal is not to “declare someone’s destiny.” The goal is to help them gain clarity, direction, and momentum.
+
+Use AI as a thoughtful assistant, not as a magical black box. Keep important system behavior deterministic and testable.
