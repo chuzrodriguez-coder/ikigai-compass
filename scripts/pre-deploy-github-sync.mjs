@@ -16,17 +16,16 @@
 
 import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
-import { createHash } from "node:crypto";
 
 // ---------------------------------------------------------------------------
 // 1. Validate prerequisites
 // ---------------------------------------------------------------------------
 
-const TOKEN = process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
+// Accept either secret name; GITHUB_PERSONAL_ACCESS_TOKEN takes precedence.
+const TOKEN = process.env.GITHUB_PERSONAL_ACCESS_TOKEN || process.env.GITHUB_TOKEN;
 if (!TOKEN) {
-  console.error("[pre-deploy] ERROR: GITHUB_PERSONAL_ACCESS_TOKEN is not set.");
-  console.error("[pre-deploy] Add a GitHub Personal Access Token (classic, repo scope) as the GITHUB_PERSONAL_ACCESS_TOKEN secret.");
+  console.error("[pre-deploy] ERROR: No GitHub token found.");
+  console.error("[pre-deploy] Set GITHUB_TOKEN (or GITHUB_PERSONAL_ACCESS_TOKEN) to a GitHub PAT with 'repo' scope.");
   process.exit(1);
 }
 
@@ -126,12 +125,11 @@ try {
 // ---------------------------------------------------------------------------
 
 /**
- * Compute the git object SHA for a blob (same algorithm git uses):
- *   SHA1("blob {byteLength}\0{content}")
+ * Compute the git object SHA for a blob using `git hash-object`.
+ * This is the same SHA git stores and GitHub reports in tree listings.
  */
-function gitBlobSha(buf) {
-  const header = Buffer.from(`blob ${buf.byteLength}\0`);
-  return createHash("sha1").update(header).update(buf).digest("hex");
+function gitBlobSha(filePath) {
+  return execSync(`git hash-object "${filePath}"`, { encoding: "utf8" }).trim();
 }
 
 let files;
@@ -152,19 +150,20 @@ const changedFiles = [];
 const unchangedBlobMap = {}; // path -> sha (re-use existing blob SHAs)
 
 for (const file of files) {
-  let buf;
+  const filePath = `${cwd}/${file}`;
+
+  let localSha;
   try {
-    buf = readFileSync(join(cwd, file));
+    localSha = gitBlobSha(filePath);
   } catch (e) {
-    console.error(`[pre-deploy] ERROR reading ${file}: ${e.message}`);
+    console.error(`[pre-deploy] ERROR hashing ${file}: ${e.message}`);
     process.exit(1);
   }
 
-  const localSha = gitBlobSha(buf);
   if (remoteBlobs[file] && remoteBlobs[file] === localSha) {
     unchangedBlobMap[file] = localSha;
   } else {
-    changedFiles.push({ file, buf });
+    changedFiles.push({ file, filePath });
   }
 }
 
@@ -185,7 +184,8 @@ const BATCH_SIZE = 10;
 const BATCH_DELAY_MS = 2000;
 
 for (let i = 0; i < changedFiles.length; i++) {
-  const { file, buf } = changedFiles[i];
+  const { file, filePath } = changedFiles[i];
+  const buf = readFileSync(filePath);
   const isBinary = buf.slice(0, 8000).includes(0);
   const encoding = isBinary ? "base64" : "utf-8";
   const content = isBinary ? buf.toString("base64") : buf.toString("utf8");
