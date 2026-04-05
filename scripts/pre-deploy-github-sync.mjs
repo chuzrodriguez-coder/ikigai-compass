@@ -175,10 +175,8 @@ console.log(
   `[pre-deploy] ${changedFiles.length} files changed, ${Object.keys(unchangedBlobMap).length} unchanged, ${deletedOnGitHub.length} deleted.`
 );
 
-if (changedFiles.length === 0 && deletedOnGitHub.length === 0 && Object.keys(remoteBlobs).length > 0) {
-  console.log("[pre-deploy] Nothing to sync — GitHub is already up to date.");
-  process.exit(0);
-}
+// Always proceed to create a commit — every deploy must produce a GitHub
+// commit for auditability, even when no file content changed.
 
 // ---------------------------------------------------------------------------
 // 5. Upload only the changed blobs (with throttle + retry)
@@ -245,7 +243,7 @@ console.log(`[pre-deploy] Tree: ${tree.sha.slice(0, 8)}`);
 
 const now = new Date().toISOString();
 const commitBody = {
-  message: `Deploy sync ${now}`,
+  message: `chore: deploy sync ${now}\n\nChanged: ${changedFiles.length}  Unchanged: ${Object.keys(unchangedBlobMap).length}  Deleted: ${deletedOnGitHub.length}`,
   tree: tree.sha,
   author: { name: "Replit Deploy Sync", email: "noreply@replit.com", date: now },
 };
