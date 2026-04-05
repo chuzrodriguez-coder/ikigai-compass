@@ -167,9 +167,15 @@ for (const file of files) {
   }
 }
 
-console.log(`[pre-deploy] ${changedFiles.length} files changed, ${Object.keys(unchangedBlobMap).length} unchanged.`);
+// Check for deletions: files present on GitHub but absent locally
+const localPathSet = new Set(files);
+const deletedOnGitHub = Object.keys(remoteBlobs).filter((p) => !localPathSet.has(p));
 
-if (changedFiles.length === 0 && Object.keys(remoteBlobs).length > 0) {
+console.log(
+  `[pre-deploy] ${changedFiles.length} files changed, ${Object.keys(unchangedBlobMap).length} unchanged, ${deletedOnGitHub.length} deleted.`
+);
+
+if (changedFiles.length === 0 && deletedOnGitHub.length === 0 && Object.keys(remoteBlobs).length > 0) {
   console.log("[pre-deploy] Nothing to sync — GitHub is already up to date.");
   process.exit(0);
 }
