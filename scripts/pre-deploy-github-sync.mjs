@@ -139,7 +139,7 @@ try {
   files = execSync("git ls-files", { encoding: "utf8" })
     .trim()
     .split("\n")
-    .filter((f) => f.length > 0 && !f.startsWith("artifacts/mockup-sandbox"));
+    .filter((f) => f.length > 0);
 } catch (e) {
   console.error(`[pre-deploy] ERROR listing git-tracked files: ${e.message}`);
   process.exit(1);
@@ -224,8 +224,9 @@ const treeEntries = Object.entries(blobMap).map(([path, sha]) => ({
   sha,
 }));
 
+// Do NOT use base_tree — create a complete snapshot tree so that files
+// deleted locally are also absent from GitHub (true mirror sync).
 const treeBody = { tree: treeEntries };
-if (currentTreeSha) treeBody.base_tree = currentTreeSha;
 
 let tree;
 try {
